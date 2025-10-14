@@ -5,6 +5,11 @@
   <!-- Mobile viewport tuned for iOS Safari -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Merchant Services Solutions</title>
+  
+  <!-- Cache busting meta tags -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -18,6 +23,108 @@
     button, a { touch-action: manipulation; }
     .scroll-lock { overflow: hidden; height: 100%; }
     .modal-scroll { -webkit-overflow-scrolling: touch; }
+    
+    /* Cyberpunk color scheme and effects */
+    :root {
+      --primary-gradient: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+      --secondary-gradient: linear-gradient(135deg, #001122 0%, #003366 100%);
+      --neon-blue: #00bfff;
+      --neon-cyan: #00ffff;
+      --neon-glow: #0080ff;
+      --dark-bg: #000000;
+      --card-bg: #0a0a0a;
+      --accent-blue: #00bfff;
+      --accent-cyan: #00ffff;
+      --accent-glow: #0080ff;
+      --text-primary: #ffffff;
+      --text-secondary: #b0b0b0;
+    }
+    
+    /* 3D Button Effects with Neon Glow */
+    .btn-3d {
+      position: relative;
+      transform: translateY(0);
+      transition: all 0.3s ease;
+      background: linear-gradient(145deg, #0a0a0a, #1a1a1a);
+      border: 1px solid var(--neon-blue);
+      box-shadow: 
+        0 4px 15px rgba(0, 0, 0, 0.8),
+        0 0 20px rgba(0, 191, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    
+    .btn-3d:hover {
+      transform: translateY(-3px);
+      box-shadow: 
+        0 8px 30px rgba(0, 0, 0, 0.9),
+        0 0 40px rgba(0, 191, 255, 0.6),
+        0 0 60px rgba(0, 191, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      border-color: var(--neon-cyan);
+    }
+    
+    .btn-3d:active {
+      transform: translateY(-1px);
+      box-shadow: 
+        0 2px 10px rgba(0, 0, 0, 0.8),
+        0 0 15px rgba(0, 191, 255, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Cyberpunk glass effect */
+    .glass {
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(15px);
+      border: 1px solid var(--neon-blue);
+      box-shadow: 
+        0 0 20px rgba(0, 191, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Cyberpunk card styling */
+    .modern-card {
+      background: linear-gradient(145deg, #0a0a0a, #1a1a1a);
+      border: 1px solid var(--neon-blue);
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.8),
+        0 0 20px rgba(0, 191, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .modern-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.9),
+        0 0 30px rgba(0, 191, 255, 0.4),
+        0 0 50px rgba(0, 191, 255, 0.2);
+      border-color: var(--neon-cyan);
+    }
+    
+    /* Neon gradient text */
+    .gradient-text {
+      background: linear-gradient(45deg, var(--neon-blue), var(--neon-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+    }
+    
+    /* Neon pulse animation */
+    .pulse-glow {
+      animation: neon-pulse 2s infinite;
+    }
+    
+    @keyframes neon-pulse {
+      0%, 100% { 
+        box-shadow: 0 0 20px rgba(0, 191, 255, 0.4);
+        border-color: var(--neon-blue);
+      }
+      50% { 
+        box-shadow: 0 0 40px rgba(0, 191, 255, 0.8), 0 0 60px rgba(0, 191, 255, 0.4);
+        border-color: var(--neon-cyan);
+      }
+    }
   </style>
 
   <!-- Chevron stepper styles -->
@@ -60,11 +167,11 @@
   </style>
 </head>
 
-<body class="min-h-screen bg-slate-900 font-sans text-slate-100">
+<body class="min-h-screen font-sans text-white" style="background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #1a1a1a 100%);">
   <div class="mx-auto max-w-5xl p-4 pb-[env(safe-area-inset-bottom)]">
 
     <!-- Header -->
-    <header class="relative mb-6 rounded-3xl bg-gradient-to-r from-blue-700 to-blue-500 p-4 sm:p-6 text-white shadow-sm pr-32 md:pr-44">
+    <header class="relative mb-6 rounded-3xl glass p-4 sm:p-6 text-white shadow-2xl pr-32 md:pr-44" style="background: linear-gradient(135deg, #001122 0%, #003366 50%, #001a33 100%);">
       <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div class="flex-1 min-w-0">
           <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
@@ -92,17 +199,17 @@
       </nav>
 
       <button id="resetBtn" type="button"
-              class="rounded-full bg-white/10 px-3 py-1 text-xs
-                     border border-slate-400/40 shadow-sm text-slate-100
-                     hover:bg-slate-700/40 hover:brightness-110 transition">
+              class="btn-3d rounded-full glass px-4 py-2 text-xs font-medium
+                     border border-white/20 shadow-lg text-white
+                     hover:bg-white/20 hover:brightness-110 transition-all duration-200">
         Reset
       </button>
     </div>
 
     <!-- Prompt line -->
    <p id="categoryPrompt" class="mt-3 mb-2 text-sm text-slate-300 flex items-center justify-center gap-2">
-  <span class="inline-block h-1.5 w-1.5 rounded-full bg-sky-300/80"></span>
-  <span id="promptText">What type of business are you working with today?</span>
+  <span class="inline-block h-2 w-2 rounded-full pulse-glow" style="background: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue);"></span>
+  <span id="promptText" class="gradient-text font-medium">What type of business are you working with today?</span>
 </p>
 
 
@@ -114,14 +221,14 @@
       <div class="mb-4 flex items-center justify-between">
         <h2 class="text-lg font-semibold text-slate-100" id="needsTitle">What does this need?</h2>
         <div class="flex gap-2">
-          <button id="selectAll" type="button" class="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs hover:bg-slate-700">Select all</button>
-          <button id="clearAll"  type="button" class="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs hover:bg-slate-700">Clear</button>
+          <button id="selectAll" type="button" class="btn-3d rounded-xl glass px-4 py-2 text-xs font-medium border border-white/20 hover:bg-white/20 transition-all duration-200">Select All</button>
+          <button id="clearAll"  type="button" class="btn-3d rounded-xl glass px-4 py-2 text-xs font-medium border border-white/20 hover:bg-white/20 transition-all duration-200">Clear</button>
         </div>
       </div>
       <div id="needsGrid" class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3"></div>
       <div class="mt-6 flex justify-end gap-2">
-        <button id="backTo1" type="button" class="rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm hover:bg-slate-700">Back</button>
-        <button id="toStep3" type="button" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">See solutions</button>
+        <button id="backTo1" type="button" class="btn-3d rounded-xl glass px-4 py-2 text-sm font-medium border border-white/20 hover:bg-white/20 transition-all duration-200">Back</button>
+        <button id="toStep3" type="button" class="btn-3d rounded-xl px-6 py-3 text-lg font-bold text-white transition-all duration-200" style="background: linear-gradient(135deg, #001122 0%, #003366 100%); border: 2px solid var(--neon-blue); box-shadow: 0 0 25px rgba(0, 191, 255, 0.4);">See Solutions</button>
       </div>
     </section>
 
@@ -129,7 +236,7 @@
     <section id="step3" class="hidden">
       <div class="mb-4 flex items-center justify-between">
         <h2 class="text-lg font-semibold text-slate-100">Recommended solutions</h2>
-        <button id="adjustNeeds" type="button" class="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs hover:bg-slate-700">Adjust needs</button>
+        <button id="adjustNeeds" type="button" class="btn-3d rounded-xl glass px-4 py-2 text-xs font-medium border border-white/20 hover:bg-white/20 transition-all duration-200">Adjust Needs</button>
       </div>
       <div id="solutionsGrid" class="grid grid-cols-1 gap-4 md:grid-cols-2"></div>
     </section>
@@ -143,30 +250,30 @@
             <h3 class="text-xl font-bold text-slate-100" id="modalTitle"></h3>
             <p class="text-sm text-slate-400">Comprehensive analysis</p>
           </div>
-          <button id="modalClose" type="button" class="rounded-full bg-slate-800 px-3 py-1 text-sm text-slate-100 ring-1 ring-slate-700 hover:bg-slate-700">Close</button>
+          <button id="modalClose" type="button" class="btn-3d rounded-full glass px-4 py-2 text-sm font-medium text-white border border-white/20 hover:bg-white/20 transition-all duration-200">Close</button>
         </div>
 
         <div class="mb-4 flex flex-wrap gap-2" id="modalLinks"></div>
 
         <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div class="rounded-2xl border border-green-900 bg-green-900/20 p-4">
-            <h4 class="mb-2 text-sm font-semibold text-green-300">Matches your selected needs</h4>
+          <div class="rounded-2xl border-2 border-green-500 bg-green-900/40 p-4" style="box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);">
+            <h4 class="mb-2 text-sm font-bold text-green-300">Matches your selected needs</h4>
             <ul id="modalMatches" class="list-inside list-disc text-sm text-green-200"></ul>
           </div>
-          <div class="rounded-2xl border border-red-900 bg-red-900/20 p-4">
-            <h4 class="mb-2 text-sm font-semibold text-red-300">Not covered</h4>
+          <div class="rounded-2xl border-2 border-red-500 bg-red-900/40 p-4" style="box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);">
+            <h4 class="mb-2 text-sm font-bold text-red-300">Not covered</h4>
             <ul id="modalMisses" class="list-inside list-disc text-sm text-red-200"></ul>
           </div>
         </div>
 
         <!-- Special Blocks (data-driven) -->
-        <div id="specialBlocksSection" class="hidden mt-4 rounded-2xl border border-slate-700 bg-slate-800 p-4">
+        <div id="specialBlocksSection" class="hidden mt-4 rounded-2xl border border-cyan-500 bg-slate-800/80 p-4" style="box-shadow: 0 0 20px rgba(0, 191, 255, 0.2);">
           <ul id="specialBlocksList" class="grid grid-cols-1 gap-2 md:grid-cols-2"></ul>
         </div>
 
         <!-- Legacy terminal details (kept for reference) -->
-        <div id="terminalDetails" class="hidden mt-4 rounded-2xl border border-slate-700 bg-slate-800 p-4">
-          <h4 class="mb-2 text-sm font-semibold text-slate-200">Available SignaPay terminal models</h4>
+        <div id="terminalDetails" class="hidden mt-4 rounded-2xl border border-cyan-500 bg-slate-800/80 p-4" style="box-shadow: 0 0 20px rgba(0, 191, 255, 0.2);">
+          <h4 class="mb-2 text-sm font-bold text-cyan-300">Available SignaPay terminal models</h4>
           <ul class="grid grid-cols-1 gap-2 md:grid-cols-2">
             <li class="rounded-lg border border-slate-700 p-3 text-sm">
               <div class="font-medium">Valor VL100 / VL100 Pro</div>
@@ -191,8 +298,8 @@
           </ul>
         </div>
 
-        <div id="shift4Details" class="hidden mt-4 rounded-2xl border border-slate-700 bg-slate-800 p-4">
-          <h4 class="mb-2 text-sm font-semibold text-slate-200">Shift4 desktop terminals</h4>
+        <div id="shift4Details" class="hidden mt-4 rounded-2xl border border-cyan-500 bg-slate-800/80 p-4" style="box-shadow: 0 0 20px rgba(0, 191, 255, 0.2);">
+          <h4 class="mb-2 text-sm font-bold text-cyan-300">Shift4 desktop terminals</h4>
           <ul class="grid grid-cols-1 gap-2 md:grid-cols-2">
             <li class="rounded-lg border border-slate-700 p-3 text-sm">
               <div class="font-medium">Countertop EMV/NFC terminals</div>
@@ -203,7 +310,7 @@
         </div>
 
         <div class="mt-4" id="allFeaturesBlock">
-          <h4 class="mb-2 text-sm font-semibold text-slate-200">All features</h4>
+          <h4 class="mb-2 text-sm font-bold text-cyan-300">All features</h4>
           <div id="allFeatures" class="flex flex-wrap gap-2"></div>
         </div>
       </div>
@@ -213,12 +320,12 @@
     <footer class="mx-auto mt-10 flex items-center justify-between text-xs text-slate-400">
       <div class="opacity-80">Powered by ArtificialSuperIntelligence.AI</div>
       <a href="admin.html"
-         class="inline-flex items-center gap-1 rounded-md border border-slate-600/60 bg-slate-800/50 px-3 py-1.5 text-slate-100 hover:bg-slate-700/60 hover:brightness-110 transition">
+         class="btn-3d inline-flex items-center gap-1 rounded-md glass px-4 py-2 text-sm font-medium border border-white/20 hover:bg-white/20 transition-all duration-200">
         Admin
       </a>
     </footer>
   </div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=1.1.0&t=20241201"></script>
 </body>
 </html>

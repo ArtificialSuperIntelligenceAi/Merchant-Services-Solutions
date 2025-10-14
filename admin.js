@@ -1,6 +1,12 @@
 const ADMIN_PASSWORD = "letmein123"; // change me
 const REPO_DATA_URL = "data/solutions.json";
 
+// Cache busting for admin
+function getCacheBustingUrl(url) {
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}v=1.1.0&t=${Date.now()}`;
+}
+
 // Originals vs working copy
 let ORIGINAL = null;
 let DATA = null;
@@ -140,7 +146,15 @@ clearPreviewBtn.addEventListener('click', () => {
 async function bootstrapFromServer(){
   try{
     setStatus("Loading from /data/solutions.json …");
-    const res = await fetch(REPO_DATA_URL, { cache: "no-store" });
+    const cacheBustedUrl = getCacheBustingUrl(REPO_DATA_URL);
+    const res = await fetch(cacheBustedUrl, { 
+      cache: "no-store",
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
     ORIGINAL = await res.json();
     DATA = deepClone(ORIGINAL);
     dirty = false; changeList = [];
