@@ -23,6 +23,13 @@ function checkForUpdates() {
     localStorage.removeItem('solutions_preview_enabled');
     localStorage.removeItem('solutions_preview_data');
     
+    // Force reload if this is a version change
+    if (lastVersion && lastVersion !== APP_VERSION) {
+      console.log('🔄 Version changed, forcing page reload...');
+      window.location.reload(true);
+      return;
+    }
+    
     // Show update notification
     showUpdateNotification();
   }
