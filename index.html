@@ -5,6 +5,7 @@
   <!-- Mobile viewport tuned for iOS Safari -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Merchant Services Solutions</title>
+  <!-- Cache bust: 20241201-2045 -->
   
   <!-- Cache busting meta tags -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -15,7 +16,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Preload data -->
-  <link rel="preload" href="data/solutions.json" as="fetch" crossorigin="anonymous">
+  <link rel="preload" href="data/solutions.json?v=1.2.4&t=20241201" as="fetch" crossorigin="anonymous">
 
   <!-- Baseline tweaks -->
   <style>
@@ -416,6 +417,12 @@
     </footer>
   </div>
 
-    <script src="app.js?v=1.2.3&t=20241201"></script>
+    <script>
+      // Dynamic cache busting
+      const timestamp = Date.now();
+      const script = document.createElement('script');
+      script.src = `app.js?v=1.2.4&t=${timestamp}&cache=bust`;
+      document.head.appendChild(script);
+    </script>
 </body>
 </html>
