@@ -190,15 +190,17 @@
         class="absolute bottom-2 right-3 h-12 w-auto sm:h-14 md:h-16 opacity-90 hover:opacity-100 transition pointer-events-none z-0" />
     </header>
 
-    <!-- Controls row: chevron stepper (left) + Reset (right) -->
-    <div class="mb-4 flex items-center justify-between gap-3">
-     <nav id="stepper" class="mb-6 flex gap-0 flex-1 text-[11px] sm:text-xs">
+    <!-- Controls row: chevron stepper + buttons -->
+    <div class="mb-4 space-y-3">
+      <!-- Stepper -->
+      <nav id="stepper" class="flex gap-0 text-[11px] sm:text-xs">
         <div class="step-chev active  border px-3 py-2">1. Business type</div>
         <div class="step-chev inactive border px-3 py-2">2. Needs</div>
         <div class="step-chev last inactive border px-3 py-2">3. Solutions</div>
       </nav>
 
-      <div class="flex items-center gap-2">
+      <!-- Buttons row -->
+      <div class="flex items-center justify-center gap-2">
         <button id="searchModeBtn" type="button"
                 class="btn-3d rounded-full glass px-4 py-2 text-xs font-medium
                        border border-white/20 shadow-lg text-white
@@ -356,6 +358,6 @@
     </footer>
   </div>
 
-  <script src="app.js?v=1.2.0&t=20241201"></script>
+  <script src="app.js?v=1.2.1&t=20241201"></script>
 </body>
 </html>
