@@ -4,7 +4,7 @@
 // ======================================
 
 // App version for cache busting
-const APP_VERSION = '1.2.1';
+const APP_VERSION = '1.2.2';
 
 // Cache busting utilities
 function getCacheBustingUrl(url) {
@@ -198,12 +198,12 @@ function renderStepper() {
     const active = step === idx;
     const done = step > idx;
     el.className =
-      "rounded-xl border px-4 py-3 font-medium transition-all duration-200 " +
+      "step-chev flex-1 border font-medium transition-all duration-200 " +
       (active
-        ? "border-cyan-400 bg-gradient-to-r from-blue-900 to-cyan-900 text-white shadow-lg pulse-glow"
+        ? "active border-cyan-400 bg-gradient-to-r from-blue-900 to-cyan-900 text-white shadow-lg pulse-glow"
         : done
-        ? "border-blue-400 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md"
-        : "border-blue-600 glass text-slate-300");
+        ? "inactive border-blue-400 bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-md"
+        : "inactive border-blue-600 glass text-slate-300");
   });
 }
 
