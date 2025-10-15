@@ -4,7 +4,7 @@ const REPO_DATA_URL = "data/solutions.json";
 // Cache busting for admin
 function getCacheBustingUrl(url) {
   const separator = url.includes('?') ? '&' : '?';
-  return `${url}${separator}v=1.1.0&t=${Date.now()}`;
+  return `${url}${separator}v=1.2.4&t=${Date.now()}`;
 }
 
 // Originals vs working copy

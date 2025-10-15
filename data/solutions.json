@@ -298,7 +298,14 @@
       "links": {
         "product": "https://www.skytab.com",
         "paperwork": "https://www.zoho.com"
-      }
+      },
+      "specialBlocks": [
+        {
+          "name": "Keywords",
+          "description": "SkyTab POS, Shift4 POS, restaurant POS, hospitality POS, pay-at-table POS, QR ordering, mobile POS, cloud POS, loyalty, analytics, reservations POS, contactless payments, table management, kitchen display, modern restaurant POS",
+          "link": ""
+        }
+      ]
     },
     {
       "id": "signapay-terminals",
@@ -388,6 +395,7 @@
         "analytics_r",
         "pin_debit",
         "dual_pricing",
+        "pci_r",
         "printing",
         "mobile_payments"
       ],
@@ -569,7 +577,10 @@
       "category": "Restaurant",
       "tags": [
         "tips",
+        "table_service",
         "counter_service",
+        "online_ordering",
+        "qr_code",
         "kitchen_printer",
         "inventory_mgmt",
         "loyalty",
@@ -577,10 +588,13 @@
         "cust_display",
         "employee_mgmt",
         "analytics",
+        "mobile_pay",
+        "pay_at_table",
+        "contactless",
         "receipt_print",
         "kitchen_display_screen"
       ],
-      "summary": "Ipad Based POS System",
+      "summary": "iPad-based POS system designed for restaurants and cafés. Offers real-time reporting, multi-device sync, and easy-to-use interfaces for employees. Supports inventory, kitchen printing, and customer display modules.",
       "details": [],
       "links": {
         "product": "https://signapayse.com",
@@ -588,15 +602,15 @@
       },
       "specialBlocks": [
         {
-          "name": "gdfgdfg",
-          "description": "dfgdfg",
+          "name": "Keywords",
+          "description": "Figure POS, iPad POS, tablet POS, restaurant POS, café POS, kitchen printer, customer display, employee management, simple POS, modern POS, multi-device POS, Apple POS",
           "link": ""
         }
       ]
     },
     {
       "id": "bodega_ai_pos",
-      "name": "Bodega AI POS",
+      "name": "Bodega Ai POS",
       "category": "Retail",
       "tags": [
         "inventory",
@@ -610,12 +624,97 @@
         "dual_pricing",
         "printing"
       ],
-      "summary": "Bodega AI Retail POS",
+      "summary": "AI-powered POS system built for small retail and convenience stores. Offers smart inventory tracking, multilingual AI assistance, dual pricing, and data-driven optimization for high-volume SKUs.",
       "details": [],
       "links": {
         "product": "https://signapay.com/bodega-ai/",
         "paperwork": "https://workdrive.zohoexternal.com/external/79450b3924ffa4e058035bb6b01bbb2d287568a02d78e86e72dedeb09f41c27f"
+      },
+      "specialBlocks": [
+        {
+          "name": "Keywords",
+          "description": "Bodega Ai, BodegAi POS, convenience store POS, AI POS, corner store POS, dual pricing, PayLo, inventory optimization, SKU database, multilingual POS, tobacco rebate, cloud POS, small merchant POS",
+          "link": ""
+        }
+      ]
+    },
+    {
+      "id": "tabit_pos",
+      "name": "Tabit POS",
+      "category": "Restaurant",
+      "tags": [
+        "tips",
+        "table_service",
+        "counter_service",
+        "reservations",
+        "online_ordering",
+        "qr_code",
+        "kitchen_printer",
+        "inventory_mgmt",
+        "loyalty",
+        "gift_cards",
+        "cust_display",
+        "employee_mgmt",
+        "analytics",
+        "mobile_pay",
+        "pay_at_table",
+        "payroll",
+        "emv",
+        "contactless",
+        "wifi",
+        "receipt_print",
+        "pci",
+        "kitchen_display_screen"
+      ],
+      "summary": "Cloud-based, mobile-first POS built for restaurants, bars, and hospitality operations. Enables tableside ordering, mobile payments, and complete front-of-house to kitchen integration.",
+      "details": [],
+      "links": {
+        "product": "",
+        "paperwork": ""
       }
+    },
+    {
+      "id": "union_pos",
+      "name": "Union POS",
+      "category": "Restaurant",
+      "tags": [
+        "tips",
+        "table_service",
+        "counter_service",
+        "reservations",
+        "online_ordering",
+        "qr_code",
+        "kitchen_printer",
+        "inventory_mgmt",
+        "loyalty",
+        "gift_cards",
+        "cust_display",
+        "employee_mgmt",
+        "analytics",
+        "mobile_pay",
+        "pay_at_table",
+        "payroll",
+        "emv",
+        "contactless",
+        "wifi",
+        "receipt_print",
+        "pci",
+        "terminal_simple",
+        "kitchen_display_screen"
+      ],
+      "summary": "High-volume hospitality / bar / restaurant OS (venue operating system) built for fast service environments. Focuses on guest-led ordering, tab management, speed, cloud operations, and integrated rewards.",
+      "details": [],
+      "links": {
+        "product": "",
+        "paperwork": ""
+      },
+      "specialBlocks": [
+        {
+          "name": "Keywords",
+          "description": "Union POS, hospitality OS, venue OS, bar POS, high-volume POS, guest-led ordering, tab management, mobile ordering, loyalty POS, cloud POS, offline bar POS, restaurant POS, bar and nightclub POS, iPhone POS",
+          "link": ""
+        }
+      ]
     }
   ]
 }

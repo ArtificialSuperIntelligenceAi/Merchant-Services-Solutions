@@ -4,7 +4,7 @@
 // ======================================
 
 // App version for cache busting
-const APP_VERSION = '1.2.3';
+const APP_VERSION = '1.2.4';
 
 // Browser history management for mobile back button support
 let historyInitialized = false;
@@ -408,6 +408,7 @@ function makeSolutionCard(item, score, searchMatches = null) {
     ms.style.background = "rgba(0, 0, 0, 0.8)";
     ms.style.border = scoreBorder;
     ms.style.boxShadow = scoreGlow;
+    
     ms.innerHTML = matchCount > 0 ? `"${searchQuery}" mentioned ${matchCount} time${matchCount > 1 ? 's' : ''}` : 'No matches';
   } else {
     // Normal mode: show percentage match
@@ -472,7 +473,8 @@ function renderStep3() {
 function performSearch(query) {
   if (!query || !DATA?.solutions) return [];
   
-  const searchTerm = query.toLowerCase().trim();
+  // Simple normalization: remove apostrophes, convert to lowercase
+  const searchTerm = query.replace(/['']/g, '').toLowerCase().trim();
   const results = [];
   
   DATA.solutions.forEach(solution => {
