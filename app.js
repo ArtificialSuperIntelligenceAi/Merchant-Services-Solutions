@@ -4,7 +4,7 @@
 // ======================================
 
 // App version for cache busting
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.2.0';
 
 // Cache busting utilities
 function getCacheBustingUrl(url) {
@@ -58,6 +58,29 @@ function showUpdateNotification() {
   }, 5000);
 }
 
+function showErrorMessage(message) {
+  // Create an error notification
+  const notification = document.createElement('div');
+  notification.className = 'fixed top-4 right-4 glass text-white px-6 py-3 rounded-xl shadow-2xl z-50 text-sm border border-red-400';
+  notification.style.background = 'linear-gradient(135deg, #4a1a1a 0%, #7a2a2a 100%)';
+  notification.style.boxShadow = '0 0 30px rgba(239, 68, 68, 0.4)';
+  notification.innerHTML = `
+    <div class="flex items-center gap-3">
+      <span class="text-lg" style="text-shadow: 0 0 10px #ef4444;">⚠</span>
+      <span class="font-bold">${message}</span>
+      <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white/80 hover:text-white hover:bg-red-500/20 rounded-full w-6 h-6 flex items-center justify-center transition-all duration-200">×</button>
+    </div>
+  `;
+  document.body.appendChild(notification);
+  
+  // Auto-remove after 8 seconds (longer for errors)
+  setTimeout(() => {
+    if (notification.parentElement) {
+      notification.remove();
+    }
+  }, 8000);
+}
+
 // Prefer preview data saved by Admin in THIS browser; otherwise fetch live file
 async function loadAppData() {
   try {
@@ -67,19 +90,36 @@ async function loadAppData() {
       console.log("⚡ Using preview data from localStorage");
       return JSON.parse(preview);
     }
-  } catch (_) {}
+  } catch (error) {
+    console.warn("Failed to load preview data:", error);
+    // Clear corrupted preview data
+    localStorage.removeItem('solutions_preview_enabled');
+    localStorage.removeItem('solutions_preview_data');
+  }
   
   // Use cache-busting URL for the JSON data
   const cacheBustedUrl = getCacheBustingUrl('data/solutions.json');
-  const res = await fetch(cacheBustedUrl, { 
-    cache: 'no-store',
-    headers: {
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
+  try {
+    const res = await fetch(cacheBustedUrl, { 
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
+    
+    if (!res.ok) {
+      throw new Error(`Failed to load data: ${res.status} ${res.statusText}`);
     }
-  });
-  return await res.json();
+    
+    return await res.json();
+  } catch (error) {
+    console.error("Failed to load app data:", error);
+    // Show user-friendly error message
+    showErrorMessage("Failed to load application data. Please refresh the page or try again later.");
+    throw error;
+  }
 }
 
 /* ===== State ===== */
@@ -88,6 +128,8 @@ let bizType = null;
 let selected = [];
 let openSolution = null;
 let DATA = null;
+let searchMode = false;
+let searchQuery = '';
 
 /* ===== DOM refs ===== */
 const stepper = document.getElementById('stepper');
@@ -114,6 +156,13 @@ const shift4Details = document.getElementById('shift4Details');
 const specialBlocksSection = document.getElementById('specialBlocksSection');
 const specialBlocksList = document.getElementById('specialBlocksList');
 
+// Search elements
+const searchModeBtn = document.getElementById('searchModeBtn');
+const searchContainer = document.getElementById('searchContainer');
+const searchInput = document.getElementById('searchInput');
+const clearSearchBtn = document.getElementById('clearSearchBtn');
+const searchResults = document.getElementById('searchResults');
+
 function escapeHTML(s){ 
   return String(s ?? "").replace(/[&<>\"']/g, m => (
     {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]
@@ -127,7 +176,9 @@ function renderPrompt() {
   if (!promptEl || !promptTextEl) return;
 
   let msg = '';
-  if (step === 1) {
+  if (searchMode) {
+    msg = searchQuery ? `Search results for "${searchQuery}"` : 'Enter a keyword to search for solutions';
+  } else if (step === 1) {
     msg = 'What type of business are you working with today?';
   } else if (step === 2) {
     msg = `Select the needs/features for this ${bizType || 'business'}.`;
@@ -140,6 +191,8 @@ function renderPrompt() {
 
 
 function renderStepper() {
+  if (!stepper) return;
+  
   [...stepper.children].forEach((el, i) => {
     const idx = i + 1;
     const active = step === idx;
@@ -182,6 +235,8 @@ function makeTypeButton(label, icon) {
 }
 
 function renderStep1() {
+  if (!step1 || !DATA?.categories) return;
+  
   step1.innerHTML = "";
   step1.classList.toggle('hidden', step !== 1);
   const map = { Restaurant: "🍕", Retail: "🏪", Service: "🔧", Ecommerce: "💻" };
@@ -189,6 +244,8 @@ function renderStep1() {
 }
 
 function renderStep2() {
+  if (!step2 || !needsTitle || !needsGrid) return;
+  
   step2.classList.toggle('hidden', step !== 2);
   if (step !== 2) return;
   needsTitle.textContent = `What does this ${bizType} need?`;
@@ -237,7 +294,7 @@ function scoreSolution(item) {
 }
 
 
-function makeSolutionCard(item, score) {
+function makeSolutionCard(item, score, searchMatches = null) {
   const btn = document.createElement('button');
   btn.type = "button";
   btn.className = "text-left w-full";
@@ -267,14 +324,29 @@ function makeSolutionCard(item, score) {
   desc.textContent = item.summary;
 
   const ms = document.createElement('div');
-  const scoreColor = score > 0 ? "text-green-400" : "text-red-400";
-  const scoreGlow = score > 0 ? "0 0 20px rgba(34, 197, 94, 0.5)" : "0 0 20px rgba(255, 0, 0, 0.5)";
-  const scoreBorder = score > 0 ? "1px solid #22c55e" : "1px solid #ef4444";
-  ms.className = `inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${scoreColor}`;
-  ms.style.background = "rgba(0, 0, 0, 0.8)";
-  ms.style.border = scoreBorder;
-  ms.style.boxShadow = scoreGlow;
-  ms.innerHTML = `${score}% Match`;
+  
+  if (searchMode && searchMatches !== null) {
+    // Search mode: show keyword match count
+    const matchCount = searchMatches;
+    const scoreColor = matchCount > 0 ? "text-cyan-400" : "text-slate-400";
+    const scoreGlow = matchCount > 0 ? "0 0 20px rgba(0, 191, 255, 0.5)" : "0 0 20px rgba(148, 163, 184, 0.3)";
+    const scoreBorder = matchCount > 0 ? "1px solid #00bfff" : "1px solid #94a3b8";
+    ms.className = `inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${scoreColor}`;
+    ms.style.background = "rgba(0, 0, 0, 0.8)";
+    ms.style.border = scoreBorder;
+    ms.style.boxShadow = scoreGlow;
+    ms.innerHTML = matchCount > 0 ? `"${searchQuery}" mentioned ${matchCount} time${matchCount > 1 ? 's' : ''}` : 'No matches';
+  } else {
+    // Normal mode: show percentage match
+    const scoreColor = score > 0 ? "text-green-400" : "text-red-400";
+    const scoreGlow = score > 0 ? "0 0 20px rgba(34, 197, 94, 0.5)" : "0 0 20px rgba(255, 0, 0, 0.5)";
+    const scoreBorder = score > 0 ? "1px solid #22c55e" : "1px solid #ef4444";
+    ms.className = `inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${scoreColor}`;
+    ms.style.background = "rgba(0, 0, 0, 0.8)";
+    ms.style.border = scoreBorder;
+    ms.style.boxShadow = scoreGlow;
+    ms.innerHTML = `${score}% Match`;
+  }
 
   card.append(top, desc, ms);
   btn.appendChild(card);
@@ -282,21 +354,145 @@ function makeSolutionCard(item, score) {
 }
 
 function renderStep3() {
+  if (!step3 || !solutionsGrid || !adjustNeedsBtn) return;
+  
   step3.classList.toggle('hidden', step !== 3);
   if (step !== 3) return;
   solutionsGrid.innerHTML = "";
-  const pool = DATA.solutions.filter(c => c.category === bizType);
-  const scored = pool.map(item => ({ item, score: scoreSolution(item) }))
-                     .sort((a,b) => b.score - a.score);
-  if (scored.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = "rounded-xl border border-slate-700 bg-slate-800 p-6 text-sm text-slate-300";
-    empty.textContent = "No matches yet. Try adding or removing needs.";
-    solutionsGrid.appendChild(empty);
+  
+  // Show/hide "Adjust Needs" button based on mode
+  if (searchMode) {
+    adjustNeedsBtn.style.display = 'none';
   } else {
-    scored.forEach(({item, score}) => solutionsGrid.appendChild(makeSolutionCard(item, score)));
+    adjustNeedsBtn.style.display = 'inline-block';
+    adjustNeedsBtn.onclick = () => { step = 2; render(); };
   }
-  adjustNeedsBtn.onclick = () => { step = 2; render(); };
+  
+  if (searchMode) {
+    // Search mode: show search results
+    const results = performSearch(searchQuery);
+    if (results.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = "rounded-xl border border-slate-700 bg-slate-800 p-6 text-sm text-slate-300";
+      empty.textContent = searchQuery ? `No solutions found for "${searchQuery}". Try a different keyword.` : "Enter a keyword to search for solutions.";
+      solutionsGrid.appendChild(empty);
+    } else {
+      results.forEach(({item, matches}) => solutionsGrid.appendChild(makeSolutionCard(item, 0, matches)));
+    }
+  } else {
+    // Normal mode: show category-based results
+    const pool = (DATA.solutions || []).filter(c => c.category === bizType);
+    const scored = pool.map(item => ({ item, score: scoreSolution(item) }))
+                       .sort((a,b) => b.score - a.score);
+    if (scored.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = "rounded-xl border border-slate-700 bg-slate-800 p-6 text-sm text-slate-300";
+      empty.textContent = "No matches yet. Try adding or removing needs.";
+      solutionsGrid.appendChild(empty);
+    } else {
+      scored.forEach(({item, score}) => solutionsGrid.appendChild(makeSolutionCard(item, score)));
+    }
+  }
+}
+
+/* ===== Search Functions ===== */
+function performSearch(query) {
+  if (!query || !DATA?.solutions) return [];
+  
+  const searchTerm = query.toLowerCase().trim();
+  const results = [];
+  
+  DATA.solutions.forEach(solution => {
+    let matchCount = 0;
+    
+    // Search in name
+    matchCount += (solution.name?.toLowerCase().split(searchTerm).length - 1) || 0;
+    
+    // Search in summary
+    matchCount += (solution.summary?.toLowerCase().split(searchTerm).length - 1) || 0;
+    
+    // Search in details
+    if (Array.isArray(solution.details)) {
+      solution.details.forEach(detail => {
+        matchCount += (detail.toLowerCase().split(searchTerm).length - 1) || 0;
+      });
+    }
+    
+    // Search in feature labels (convert tags to labels)
+    if (Array.isArray(solution.tags)) {
+      const featLabels = (DATA.features[solution.category] || [])
+        .reduce((acc, f) => { acc[f.id] = f.label; return acc; }, {});
+      
+      solution.tags.forEach(tag => {
+        const label = featLabels[tag];
+        if (label) {
+          matchCount += (label.toLowerCase().split(searchTerm).length - 1) || 0;
+        }
+      });
+    }
+    
+    // Search in special blocks
+    if (Array.isArray(solution.specialBlocks)) {
+      solution.specialBlocks.forEach(block => {
+        matchCount += (block.name?.toLowerCase().split(searchTerm).length - 1) || 0;
+        matchCount += (block.description?.toLowerCase().split(searchTerm).length - 1) || 0;
+      });
+    }
+    
+    if (matchCount > 0) {
+      results.push({ item: solution, matches: matchCount });
+    }
+  });
+  
+  // Sort by match count (highest first)
+  return results.sort((a, b) => b.matches - a.matches);
+}
+
+function toggleSearchMode() {
+  searchMode = !searchMode;
+  
+  if (searchMode) {
+    // Enter search mode
+    searchContainer.classList.remove('hidden');
+    searchInput.focus();
+    step = 3; // Go directly to results
+    searchModeBtn.textContent = '📋 Guided';
+    searchModeBtn.style.background = 'linear-gradient(135deg, #4a1a1a 0%, #7a2a2a 100%)';
+  } else {
+    // Exit search mode
+    searchContainer.classList.add('hidden');
+    searchQuery = '';
+    searchInput.value = '';
+    searchResults.textContent = '';
+    step = 1; // Go back to start
+    searchModeBtn.textContent = '🔍 Search';
+    searchModeBtn.style.background = '';
+  }
+  
+  render();
+}
+
+function handleSearch() {
+  searchQuery = searchInput.value.trim();
+  
+  if (searchQuery) {
+    const results = performSearch(searchQuery);
+    searchResults.textContent = `Found ${results.length} solution${results.length !== 1 ? 's' : ''} with "${searchQuery}"`;
+    step = 3; // Show results
+  } else {
+    searchResults.textContent = '';
+    step = 3; // Show empty state
+  }
+  
+  render();
+}
+
+function clearSearch() {
+  searchInput.value = '';
+  searchQuery = '';
+  searchResults.textContent = '';
+  step = 3; // Show empty state
+  render();
 }
 
 /* ===== Modal control ===== */
@@ -369,15 +565,73 @@ function closeModal() {
 /* ===== Wire events ===== */
 document.getElementById('modalBackdrop').addEventListener('click', closeModal);
 document.getElementById('modalClose').addEventListener('click', closeModal);
-resetBtn.addEventListener('click', () => { step = 1; bizType = null; selected = []; render(); });
+resetBtn.addEventListener('click', () => { 
+  step = 1; 
+  bizType = null; 
+  selected = []; 
+  searchMode = false;
+  searchQuery = '';
+  searchContainer.classList.add('hidden');
+  searchInput.value = '';
+  searchResults.textContent = '';
+  searchModeBtn.textContent = '🔍 Search';
+  searchModeBtn.style.background = '';
+  render(); 
+});
+
+// Search event listeners
+if (searchModeBtn) {
+  searchModeBtn.addEventListener('click', toggleSearchMode);
+}
+if (searchInput) {
+  searchInput.addEventListener('input', handleSearch);
+  searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  });
+}
+if (clearSearchBtn) {
+  clearSearchBtn.addEventListener('click', clearSearch);
+}
 
 /* ===== Init ===== */
 async function bootstrap() {
-  // Check for app updates first
-  checkForUpdates();
+  try {
+    // Check for app updates first
+    checkForUpdates();
+    
+    DATA = await loadAppData();
+    render();
+  } catch (error) {
+    console.error("Failed to bootstrap app:", error);
+    // Show error state in the UI
+    showAppErrorState();
+  }
+}
+
+function showAppErrorState() {
+  // Hide all steps and show error message
+  step1.classList.add('hidden');
+  step2.classList.add('hidden');
+  step3.classList.add('hidden');
   
-  DATA = await loadAppData();
-  render();
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'text-center py-12';
+  errorDiv.innerHTML = `
+    <div class="glass rounded-2xl p-8 max-w-md mx-auto">
+      <div class="text-6xl mb-4">⚠️</div>
+      <h2 class="text-xl font-bold text-white mb-4">Unable to Load Application</h2>
+      <p class="text-slate-300 mb-6">There was a problem loading the application data. This could be due to a network issue or server problem.</p>
+      <button onclick="location.reload()" class="btn-3d rounded-xl px-6 py-3 text-lg font-bold text-white transition-all duration-200" style="background: linear-gradient(135deg, #001122 0%, #003366 100%); border: 2px solid var(--neon-blue); box-shadow: 0 0 25px rgba(0, 191, 255, 0.4);">
+        Try Again
+      </button>
+    </div>
+  `;
+  
+  // Insert error message after the header
+  const header = document.querySelector('header');
+  header.insertAdjacentElement('afterend', errorDiv);
 }
 function render(){ renderStepper(); renderStep1(); renderStep2(); renderStep3(); renderPrompt(); }
 bootstrap();
