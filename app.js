@@ -4,7 +4,10 @@
 // ======================================
 
 // App version for cache busting
-const APP_VERSION = '1.2.2';
+const APP_VERSION = '1.2.3';
+
+// Browser history management for mobile back button support
+let historyInitialized = false;
 
 // Cache busting utilities
 function getCacheBustingUrl(url) {
@@ -56,6 +59,76 @@ function showUpdateNotification() {
       notification.remove();
     }
   }, 5000);
+}
+
+// Browser history management functions
+function initializeBrowserHistory() {
+  if (historyInitialized) return;
+  
+  // Listen for browser back/forward button
+  window.addEventListener('popstate', handleBrowserNavigation);
+  
+  // Add initial state to history
+  history.replaceState({ step: 1, searchMode: false, modalOpen: false }, '', '#step1');
+  
+  historyInitialized = true;
+  console.log('📱 Browser history initialized for mobile back button support');
+}
+
+function handleBrowserNavigation(event) {
+  if (!event.state) {
+    // No state, go back to step 1
+    goToStep(1);
+    return;
+  }
+  
+  const { step, searchMode, modalOpen } = event.state;
+  
+  // Check if modal should be open/closed
+  if (modalOpen && !openSolution) {
+    // Modal should be open but isn't - this shouldn't happen
+    console.log('📱 Modal state mismatch - modal should be open');
+  } else if (!modalOpen && openSolution) {
+    // Modal should be closed but is open - close it via back button
+    closeModalViaBackButton();
+    return;
+  }
+  
+  // Restore app state
+  if (searchMode) {
+    // Handle search mode restoration
+    searchMode = true;
+    searchQuery = '';
+    renderSearchMode();
+  } else {
+    // Handle normal step navigation
+    goToStep(step, true); // Skip history to avoid infinite loop
+  }
+}
+
+function pushToHistory(step, searchMode = false, modalOpen = false) {
+  const state = { step, searchMode, modalOpen };
+  const url = searchMode ? '#search' : `#step${step}`;
+  
+  history.pushState(state, '', url);
+  console.log(`📱 Pushed to history: step ${step}, searchMode: ${searchMode}, modalOpen: ${modalOpen}`);
+}
+
+function clearHistory() {
+  // Clear browser history and reset to step 1
+  history.replaceState({ step: 1, searchMode: false, modalOpen: false }, '', '#step1');
+  console.log('📱 Browser history cleared');
+}
+
+// Navigation function that handles browser history
+function goToStep(newStep, skipHistory = false) {
+  step = newStep;
+  
+  if (!skipHistory && historyInitialized) {
+    pushToHistory(step, searchMode, !!openSolution);
+  }
+  
+  render();
 }
 
 function showErrorMessage(message) {
@@ -212,7 +285,7 @@ function makeTypeButton(label, icon) {
   btn.type = "button";
   btn.className =
     "btn-3d group flex w-full items-center gap-4 rounded-2xl modern-card p-6 transition-all duration-300 hover:scale-105";
-  btn.onclick = () => { bizType = label; step = 2; render(); };
+  btn.onclick = () => { bizType = label; goToStep(2); };
 
   const iconDiv = document.createElement('div');
   iconDiv.className = "text-3xl filter drop-shadow-lg";
@@ -275,8 +348,8 @@ function renderStep2() {
 
   document.getElementById('selectAll').onclick = () => { selected = menu.map(m=>m.label); renderStep2(); };
   document.getElementById('clearAll').onclick = () => { selected = []; renderStep2(); };
-  document.getElementById('backTo1').onclick = () => { step = 1; render(); };
-  document.getElementById('toStep3').onclick  = () => { step = 3; render(); };
+  document.getElementById('backTo1').onclick = () => { goToStep(1); };
+  document.getElementById('toStep3').onclick  = () => { goToStep(3); };
 }
 
 function scoreSolution(item) {
@@ -365,7 +438,7 @@ function renderStep3() {
     adjustNeedsBtn.style.display = 'none';
   } else {
     adjustNeedsBtn.style.display = 'inline-block';
-    adjustNeedsBtn.onclick = () => { step = 2; render(); };
+    adjustNeedsBtn.onclick = () => { goToStep(2); };
   }
   
   if (searchMode) {
@@ -455,7 +528,7 @@ function toggleSearchMode() {
     // Enter search mode
     searchContainer.classList.remove('hidden');
     searchInput.focus();
-    step = 3; // Go directly to results
+    goToStep(3); // Go directly to results
     searchModeBtn.textContent = '📋 Guided';
     searchModeBtn.style.background = 'linear-gradient(135deg, #4a1a1a 0%, #7a2a2a 100%)';
   } else {
@@ -464,7 +537,7 @@ function toggleSearchMode() {
     searchQuery = '';
     searchInput.value = '';
     searchResults.textContent = '';
-    step = 1; // Go back to start
+    goToStep(1); // Go back to start
     searchModeBtn.textContent = '🔍 Search';
     searchModeBtn.style.background = '';
   }
@@ -478,10 +551,10 @@ function handleSearch() {
   if (searchQuery) {
     const results = performSearch(searchQuery);
     searchResults.textContent = `Found ${results.length} solution${results.length !== 1 ? 's' : ''} with "${searchQuery}"`;
-    step = 3; // Show results
+    goToStep(3); // Show results
   } else {
     searchResults.textContent = '';
-    step = 3; // Show empty state
+    goToStep(3); // Show empty state
   }
   
   render();
@@ -491,7 +564,7 @@ function clearSearch() {
   searchInput.value = '';
   searchQuery = '';
   searchResults.textContent = '';
-  step = 3; // Show empty state
+  goToStep(3); // Show empty state
   render();
 }
 
@@ -554,12 +627,32 @@ if (Array.isArray(item.specialBlocks) && item.specialBlocks.length) {
   modal.classList.remove('hidden'); modal.classList.add('flex');
   document.documentElement.classList.add('scroll-lock');
   document.body.classList.add('scroll-lock');
+  
+  // Add modal state to browser history
+  if (historyInitialized) {
+    pushToHistory(step, searchMode, true);
+  }
 }
 function closeModal() {
   modal.classList.add('hidden'); modal.classList.remove('flex');
   openSolution = null;
   document.documentElement.classList.remove('scroll-lock');
   document.body.classList.remove('scroll-lock');
+  
+  // Update browser history to reflect modal is closed
+  if (historyInitialized) {
+    pushToHistory(step, searchMode, false);
+  }
+}
+
+function closeModalViaBackButton() {
+  modal.classList.add('hidden'); modal.classList.remove('flex');
+  openSolution = null;
+  document.documentElement.classList.remove('scroll-lock');
+  document.body.classList.remove('scroll-lock');
+  
+  // Don't push new history - we're going back to previous state
+  console.log('📱 Modal closed via back button');
 }
 
 /* ===== Wire events ===== */
@@ -570,6 +663,7 @@ resetBtn.addEventListener('click', () => {
   bizType = null; 
   selected = []; 
   searchMode = false;
+  clearHistory();
   searchQuery = '';
   searchContainer.classList.add('hidden');
   searchInput.value = '';
@@ -600,6 +694,9 @@ async function bootstrap() {
   try {
     // Check for app updates first
     checkForUpdates();
+    
+    // Initialize browser history for mobile back button support
+    initializeBrowserHistory();
     
     DATA = await loadAppData();
     render();
