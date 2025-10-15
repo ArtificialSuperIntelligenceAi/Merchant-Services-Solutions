@@ -565,6 +565,8 @@ function clearSearch() {
   searchQuery = '';
   searchResults.textContent = '';
   goToStep(3); // Show empty state
+  // Dismiss keyboard on mobile for better visibility
+  searchInput.blur();
   render();
 }
 
@@ -682,6 +684,8 @@ if (searchInput) {
   searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       handleSearch();
+      // Dismiss keyboard on mobile for better visibility
+      searchInput.blur();
     }
   });
 }
