@@ -446,107 +446,6 @@
       ]
     },
     {
-      "id": "fieldpro_pos",
-      "name": "FieldPro POS",
-      "category": "Service",
-      "tags": [
-        "mobile_payments",
-        "estimates",
-        "invoices",
-        "tips",
-        "tech_tracking"
-      ],
-      "summary": "Mobile-first POS for field services (HVAC, plumbing, contractors). Create estimates, convert to invoices, take payments on-site, and track technicians/jobs.",
-      "links": {
-        "site": "https://example.com/fieldpro"
-      },
-      "specialBlocks": [
-        {
-          "name": "Supported Hardware",
-          "description": "Bluetooth card readers and rugged Android/iOS devices for on-site payments.",
-          "link": "https://example.com/fieldpro/hardware"
-        },
-        {
-          "name": "Dispatch & Tracking",
-          "description": "Assign jobs, live location sharing for technicians, and status updates.",
-          "link": "https://example.com/fieldpro/dispatch"
-        }
-      ]
-    },
-    {
-      "id": "subscribio_billing",
-      "name": "Subscribio Billing",
-      "category": "Service",
-      "tags": [
-        "subscriptions",
-        "invoices"
-      ],
-      "summary": "Simple recurring billing with invoice automation. Great for memberships, maintenance plans, and retainer services.",
-      "links": {
-        "site": "https://example.com/subscribio"
-      },
-      "specialBlocks": [
-        {
-          "name": "Dunning & Retries",
-          "description": "Automatic card retries, email reminders, and account updater to reduce churn.",
-          "link": "https://example.com/subscribio/dunning"
-        }
-      ]
-    },
-    {
-      "id": "shopswift",
-      "name": "ShopSwift",
-      "category": "Ecommerce",
-      "tags": [
-        "online_catalog",
-        "shopping_cart",
-        "payments",
-        "shipping",
-        "tax",
-        "discount_codes",
-        "abandoned_cart"
-      ],
-      "summary": "All‑in‑one ecommerce platform for small stores. Launch quickly with themes, secure checkout, and built‑in marketing tools.",
-      "links": {
-        "site": "https://example.com/shopswift"
-      },
-      "specialBlocks": [
-        {
-          "name": "Theme Store",
-          "description": "Customize storefront with modern templates and sections.",
-          "link": "https://example.com/shopswift/themes"
-        },
-        {
-          "name": "Marketing",
-          "description": "Email capture, discount codes, and abandoned‑cart recovery.",
-          "link": "https://example.com/shopswift/marketing"
-        }
-      ]
-    },
-    {
-      "id": "cartlite",
-      "name": "CartLite",
-      "category": "Ecommerce",
-      "tags": [
-        "online_catalog",
-        "shopping_cart",
-        "payments",
-        "inventory_sync",
-        "omnichannel"
-      ],
-      "summary": "Lightweight cart for businesses that already have a POS. Sync inventory and sell online with pickup or in‑store fulfillment.",
-      "links": {
-        "site": "https://example.com/cartlite"
-      },
-      "specialBlocks": [
-        {
-          "name": "POS Sync",
-          "description": "Two‑way inventory sync and order injection back to store POS.",
-          "link": "https://example.com/cartlite/pos-sync"
-        }
-      ]
-    },
-    {
       "id": "shift4-retail-terminals",
       "name": "Shift4 Desktop Terminals",
       "category": "Retail",
@@ -715,6 +614,53 @@
           "link": ""
         }
       ]
+    },
+    {
+      "id": "pos",
+      "name": "POS+",
+      "category": "Service",
+      "tags": [
+        "online_booking",
+        "invoices",
+        "estimates",
+        "mobile_payments",
+        "subscriptions",
+        "tech_tracking"
+      ],
+      "summary": "POS+ is a middleware solution that lets us integrate our payment processing into existing service software like Housecall Pro, Jobber, and other platforms. It allows merchants to keep using their current software while we handle the payment side — enabling features like dual pricing, surcharging, and custom processing options without disrupting their workflow.",
+      "details": [],
+      "links": {
+        "product": "https://www.posplus.org",
+        "paperwork": "https://workdrive.zoho.com/folder/indn96ef40869d1a84bc7b6f4b9a68206e626"
+      }
+    },
+    {
+      "id": "swipe_simple",
+      "name": "Swipe Simple",
+      "category": "Service",
+      "tags": [
+        "invoices",
+        "mobile_payments",
+        "subscriptions"
+      ],
+      "summary": "SwipeSimple is a payment gateway we use for service-based merchants who need to accept payments through mobile devices, virtual terminals, or card readers. It's ideal for merchants who don't use a full POS system but still need a reliable way to process cards, send invoices, or take payments on-site or remotely.",
+      "details": [],
+      "links": {
+        "product": "https://home.swipesimple.com",
+        "paperwork": ""
+      }
+    },
+    {
+      "id": "swipe_simple_2",
+      "name": "Swipe Simple",
+      "category": "Ecommerce",
+      "tags": [],
+      "summary": "SwipeSimple is a payment gateway that provides secure online payment capabilities through hosted checkout links, buttons, and payment forms. It allows merchants to collect payments for online orders, invoices, and one-time purchases without the need for a full shopping cart integration.",
+      "details": [],
+      "links": {
+        "product": "https://home.swipesimple.com",
+        "paperwork": "https://workdrive.zoho.com/folder/8zaf966f327c540a048f5810af952ac50237a"
+      }
     }
   ]
 }
