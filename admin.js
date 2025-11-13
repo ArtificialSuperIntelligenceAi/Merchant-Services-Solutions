@@ -1,6 +1,11 @@
 const ADMIN_PASSWORD = "letmein123"; // change me
 const REPO_DATA_URL = "data/solutions.json";
 
+// AWS API Configuration
+// TODO: Replace with your actual API Gateway endpoint after setup
+// Format: https://YOUR-API-ID.execute-api.REGION.amazonaws.com/prod/solutions
+const API_ENDPOINT = window.API_ENDPOINT || "https://mfkzbtluw5.execute-api.ap-southeast-2.amazonaws.com/prod/solutions";
+
 // Cache busting for admin
 function getCacheBustingUrl(url) {
   const separator = url.includes('?') ? '&' : '?';
@@ -101,7 +106,7 @@ discardBtn.addEventListener("click", () => {
   renderDirty();
   setStatus("Reverted to last loaded data");
 });
-saveAllBtn.addEventListener("click", () => {
+saveAllBtn.addEventListener("click", async () => {
   if (!dirty) { alert("No changes to save."); return; }
 
   // 1) Work on a clone so UI state doesn't jump
@@ -117,10 +122,56 @@ saveAllBtn.addEventListener("click", () => {
   try { validateData(staged, true); }
   catch (e) { alert("Fix validation issues before saving:\n" + e.message); return; }
 
-  // 4) Export
-  if (!confirm("Save all staged changes and export an updated solutions.json?")) return;
-  downloadJSON(staged, "solutions.json");
-  setStatus("Exported updated solutions.json");
+  // 4) Save to AWS via API
+  if (!confirm("Save all staged changes to AWS? This will update the live app immediately.")) return;
+  
+  // Disable button during save
+  saveAllBtn.disabled = true;
+  saveAllBtn.textContent = "Saving...";
+  setStatus("Saving to AWS...");
+  
+  try {
+    const response = await fetch(API_ENDPOINT, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(staged)
+    });
+    
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(result.error || `Server error: ${response.status}`);
+    }
+    
+    // Success - update original and clear dirty state
+    ORIGINAL = deepClone(staged);
+    DATA = deepClone(staged);
+    dirty = false;
+    changeList = [];
+    hydrateUI();
+    renderDirty();
+    setLastLoaded();
+    setStatus("✅ Saved successfully! Changes are live.");
+    
+    // Show success message
+    alert("✅ Successfully saved to AWS!\n\nThe changes are now live. Users will see the updates when they refresh the app.");
+    
+  } catch (error) {
+    console.error("Save error:", error);
+    setStatus(`❌ Error: ${error.message}`);
+    alert(`Failed to save to AWS:\n\n${error.message}\n\nYou can still download the JSON file manually if needed.`);
+    
+    // Offer fallback download
+    if (confirm("Would you like to download the JSON file as a backup?")) {
+      downloadJSON(staged, "solutions.json");
+    }
+  } finally {
+    // Re-enable button
+    saveAllBtn.disabled = false;
+    saveAllBtn.textContent = "Save All";
+  }
 });
 
 // Preview: save to localStorage so the main app uses it in THIS browser
@@ -143,10 +194,13 @@ clearPreviewBtn.addEventListener('click', () => {
 });
 
 // ---------- Init ----------
+// Data source configuration (should match app.js)
+const DATA_URL = window.DATA_URL || REPO_DATA_URL;
+
 async function bootstrapFromServer(){
   try{
-    setStatus("Loading from /data/solutions.json …");
-    const cacheBustedUrl = getCacheBustingUrl(REPO_DATA_URL);
+    setStatus("Loading from data source…");
+    const cacheBustedUrl = getCacheBustingUrl(DATA_URL);
     const res = await fetch(cacheBustedUrl, { 
       cache: "no-store",
       headers: {
@@ -155,6 +209,9 @@ async function bootstrapFromServer(){
         'Expires': '0'
       }
     });
+    if (!res.ok) {
+      throw new Error(`Failed to load: ${res.status} ${res.statusText}`);
+    }
     ORIGINAL = await res.json();
     DATA = deepClone(ORIGINAL);
     dirty = false; changeList = [];
@@ -164,8 +221,8 @@ async function bootstrapFromServer(){
     setStatus("Loaded live data");
   }catch(e){
     console.error(e);
-    setStatus("Failed to load /data/solutions.json");
-    alert("Could not load /data/solutions.json");
+    setStatus("Failed to load data");
+    alert(`Could not load data from ${DATA_URL}\n\nError: ${e.message}`);
   }
 }
 

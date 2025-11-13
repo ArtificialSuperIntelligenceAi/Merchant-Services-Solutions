@@ -154,6 +154,13 @@ function showErrorMessage(message) {
   }, 8000);
 }
 
+// Data source configuration
+// TODO: After AWS setup, update this to your S3 bucket URL
+// Option 1: S3 public URL: https://YOUR-BUCKET.s3.REGION.amazonaws.com/data/solutions.json
+// Option 2: S3 website endpoint: https://YOUR-BUCKET.s3-website-REGION.amazonaws.com/data/solutions.json
+// Option 3: CloudFront URL (recommended): https://YOUR-DISTRIBUTION.cloudfront.net/data/solutions.json
+const DATA_URL = window.DATA_URL || "http://merchant-solutions-app-signapayse.s3-website-ap-southeast-2.amazonaws.com/data/solutions.json";
+
 // Prefer preview data saved by Admin in THIS browser; otherwise fetch live file
 async function loadAppData() {
   try {
@@ -171,7 +178,7 @@ async function loadAppData() {
   }
   
   // Use cache-busting URL for the JSON data
-  const cacheBustedUrl = getCacheBustingUrl('data/solutions.json');
+  const cacheBustedUrl = getCacheBustingUrl(DATA_URL);
   try {
     const res = await fetch(cacheBustedUrl, { 
       cache: 'no-store',

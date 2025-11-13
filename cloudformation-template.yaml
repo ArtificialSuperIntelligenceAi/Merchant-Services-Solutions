@@ -1,0 +1,248 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Infrastructure for Merchant Services Solutions App - S3 hosting with Lambda API for admin updates'
+
+Parameters:
+  WebsiteBucketName:
+    Type: String
+    Description: Name for the website hosting bucket (must be globally unique)
+    Default: merchant-solutions-app
+  
+  DataBucketName:
+    Type: String
+    Description: Name for the data storage bucket (must be globally unique)
+    Default: merchant-solutions-data
+  
+  APIName:
+    Type: String
+    Description: Name for the API Gateway
+    Default: merchant-solutions-api
+
+Resources:
+  # Website Hosting Bucket
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref WebsiteBucketName
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      VersioningConfiguration:
+        Status: Enabled
+
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Sub '${WebsiteBucket}/*'
+
+  # Data Storage Bucket (Private)
+  DataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref DataBucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+
+  # Lambda Execution Role
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: S3DataAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                Resource: !Sub '${DataBucket}/data/*'
+
+  # Lambda Function
+  SolutionsAPIFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: merchant-solutions-api
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          const AWS = require('aws-sdk');
+          const s3 = new AWS.S3();
+          
+          const DATA_BUCKET = process.env.DATA_BUCKET || 'merchant-solutions-data';
+          const DATA_KEY = process.env.DATA_KEY || 'data/solutions.json';
+          
+          function validateData(data) {
+            if (!data || typeof data !== 'object') {
+              throw new Error('Invalid data: must be an object');
+            }
+            if (!Array.isArray(data.categories)) {
+              throw new Error('Invalid data: categories must be an array');
+            }
+            if (!data.features || typeof data.features !== 'object') {
+              throw new Error('Invalid data: features must be an object');
+            }
+            if (!Array.isArray(data.solutions)) {
+              throw new Error('Invalid data: solutions must be an array');
+            }
+            data.solutions.forEach((sol, idx) => {
+              if (!sol.id || !sol.name || !sol.category) {
+                throw new Error(`Solution at index ${idx} missing required fields`);
+              }
+            });
+            return true;
+          }
+          
+          exports.handler = async (event) => {
+            const headers = {
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+              'Access-Control-Allow-Methods': 'GET,PUT,OPTIONS',
+              'Content-Type': 'application/json'
+            };
+            
+            if (event.httpMethod === 'OPTIONS') {
+              return { statusCode: 200, headers, body: '' };
+            }
+            
+            if (event.httpMethod !== 'PUT') {
+              return {
+                statusCode: 405,
+                headers,
+                body: JSON.stringify({ error: 'Method not allowed. Use PUT.' })
+              };
+            }
+            
+            try {
+              let body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
+              validateData(body);
+              
+              const jsonString = JSON.stringify(body, null, 2);
+              
+              await s3.putObject({
+                Bucket: DATA_BUCKET,
+                Key: DATA_KEY,
+                Body: jsonString,
+                ContentType: 'application/json',
+                CacheControl: 'no-cache'
+              }).promise();
+              
+              return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify({
+                  success: true,
+                  message: 'Data saved successfully',
+                  timestamp: new Date().toISOString()
+                })
+              };
+            } catch (error) {
+              return {
+                statusCode: error.message.includes('Invalid data') ? 400 : 500,
+                headers,
+                body: JSON.stringify({
+                  success: false,
+                  error: error.message || 'Internal server error'
+                })
+              };
+            }
+          };
+      Environment:
+        Variables:
+          DATA_BUCKET: !Ref DataBucketName
+          DATA_KEY: 'data/solutions.json'
+      Timeout: 30
+
+  # API Gateway
+  SolutionsAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Ref APIName
+      Description: API for Merchant Solutions admin updates
+
+  SolutionsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref SolutionsAPI
+      ParentId: !GetAtt SolutionsAPI.RootResourceId
+      PathPart: solutions
+
+  SolutionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref SolutionsAPI
+      ResourceId: !Ref SolutionsResource
+      HttpMethod: PUT
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SolutionsAPIFunction.Arn}/invocations'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # Lambda Permission for API Gateway
+  LambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref SolutionsAPIFunction
+      Action: 'lambda:InvokeFunction'
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SolutionsAPI}/*/*'
+
+  # API Gateway Deployment
+  APIDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: SolutionsMethod
+    Properties:
+      RestApiId: !Ref SolutionsAPI
+      StageName: prod
+
+Outputs:
+  WebsiteURL:
+    Description: URL of the website
+    Value: !Sub 'http://${WebsiteBucket}.s3-website-${AWS::Region}.amazonaws.com'
+    Export:
+      Name: !Sub '${AWS::StackName}-WebsiteURL'
+  
+  APIEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${SolutionsAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/solutions'
+    Export:
+      Name: !Sub '${AWS::StackName}-APIEndpoint'
+  
+  DataBucketName:
+    Description: Name of the data storage bucket
+    Value: !Ref DataBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-DataBucket'
+
