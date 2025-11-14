@@ -159,7 +159,7 @@ function showErrorMessage(message) {
 // Option 1: S3 public URL: https://YOUR-BUCKET.s3.REGION.amazonaws.com/data/solutions.json
 // Option 2: S3 website endpoint: https://YOUR-BUCKET.s3-website-REGION.amazonaws.com/data/solutions.json
 // Option 3: CloudFront URL (recommended): https://YOUR-DISTRIBUTION.cloudfront.net/data/solutions.json
-const DATA_URL = window.DATA_URL || "http://merchant-solutions-app-signapayse.s3-website-ap-southeast-2.amazonaws.com/data/solutions.json";
+const DATA_URL = window.DATA_URL || "https://d3ag3dtz0jfihu.cloudfront.net/data/solutions.json";
 
 // Prefer preview data saved by Admin in THIS browser; otherwise fetch live file
 async function loadAppData() {
